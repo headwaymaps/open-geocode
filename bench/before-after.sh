@@ -29,7 +29,7 @@ for ref in "$@"; do
   src=$work/src-$ref
   [ -d "$src" ] || git -C "$repo" worktree add --detach "$src" "$ref"
   git -C "$src" checkout -q --detach "$ref"
-  (cd "$src" && cargo build --release --bin og)
+  (cd "$src" && cargo build --release --bin og --features tui)
   rm -rf "$OG_HOME/packs/netherlands"
   /usr/bin/time -v -o "$work/build-time-$ref.txt" \
     taskset -c "$build_cpus" "$src/target/release/og" build --region netherlands --fresh
