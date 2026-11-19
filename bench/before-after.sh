@@ -11,6 +11,14 @@ work=${OG_BENCH_WORK:-$HOME/og-bench}
 export OG_HOME=$work/og-home
 build_cpus=2-11
 mkdir -p "$work" "$OG_HOME"
+
+# The harness runs `sudo -n` throughout. Ask for the password once, then keep
+# sudo's cached credential fresh until this script exits.
+sudo -v
+while sudo -n -v; do sleep 60; done &
+keepalive=$!
+trap 'kill $keepalive 2>/dev/null' EXIT
+
 sudo -n mkdir -p /srv/og-bench
 sudo -n chown "$(id -u):$(id -g)" /srv/og-bench
 
