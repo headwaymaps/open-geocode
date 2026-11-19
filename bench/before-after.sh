@@ -28,6 +28,17 @@ sudo -n mkdir -p /srv/og-bench
 sudo -n chown "$(id -u):$(id -g)" /srv/og-bench
 
 [ -x "$work/bin/oha" ] || cargo install oha --locked --root "$work"
+
+# The extract the query set was drawn from (bench/data/queries/meta.json).
+pbf=$OG_HOME/pbf/netherlands.osm.pbf
+pbf_sha256=$(sed -n 's/.*"pbf_sha256": "\(.*\)".*/\1/p' "$bench/data/queries/meta.json")
+if ! echo "$pbf_sha256  $pbf" | sha256sum -c --quiet 2>/dev/null; then
+  mkdir -p "$(dirname "$pbf")"
+  rm -f "$pbf" "$pbf.part"
+  curl -fL -o "$pbf.part" https://download.geofabrik.de/europe/netherlands/netherlands-261101.osm.pbf
+  echo "$pbf_sha256  $pbf.part" | sha256sum -c --quiet
+  mv "$pbf.part" "$pbf"
+fi
 (cd "$bench" && cargo build --release)
 
 for ref in "$@"; do
