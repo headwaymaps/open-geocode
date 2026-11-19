@@ -19,7 +19,10 @@ while sudo -n -v; do sleep 60; done &
 keepalive=$!
 trap 'kill $keepalive 2>/dev/null' EXIT
 
-[ -x /usr/bin/time ] || { echo "needs GNU time for peak memory: sudo apt install time" >&2; exit 1; }
+missing=()
+[ -x /usr/bin/time ] || missing+=(time)
+command -v fio >/dev/null || missing+=(fio)
+[ ${#missing[@]} -eq 0 ] || { echo "first run: sudo apt install ${missing[*]}" >&2; exit 1; }
 
 sudo -n mkdir -p /srv/og-bench
 sudo -n chown "$(id -u):$(id -g)" /srv/og-bench
