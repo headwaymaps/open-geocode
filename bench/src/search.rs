@@ -146,7 +146,7 @@ pub fn fixed(
 /// The CPU counts tried for the job, smallest-first order of preference.
 pub const JOB_CPUS: [u32; 3] = [4, 2, 1];
 /// The box that decides "does not meet job" when even 4 CPUs fail.
-pub const BIG_CPUS: u32 = 16;
+pub const BIG_CPUS: u32 = crate::host::SUT_MAX_CPUS;
 
 /// The smallest CPU count in `JOB_CPUS` that passes, walking down from 4 and
 /// stopping at the first failure. If 4 fails, 16 is tried: a pass there makes

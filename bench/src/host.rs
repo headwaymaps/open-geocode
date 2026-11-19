@@ -24,10 +24,10 @@ use std::time::Instant;
 use anyhow::{Context, Result, bail, ensure};
 use serde::{Deserialize, Serialize};
 
-pub const OTHER_CPUS: &str = "0-7";
-pub const LOAD_CPUS: &str = "8-15";
-pub const SUT_FIRST_CPU: u32 = 16;
-pub const SUT_MAX_CPUS: u32 = 16;
+pub const OTHER_CPUS: &str = "0-1";
+pub const LOAD_CPUS: &str = "2-4";
+pub const SUT_FIRST_CPU: u32 = 5;
+pub const SUT_MAX_CPUS: u32 = 7;
 const PINNED_UNITS: [&str; 3] = ["system.slice", "user.slice", "init.scope"];
 const SUT_SLICE: &str = "sut.slice";
 const SUT_CGROUP: &str = "/sys/fs/cgroup/sut.slice";
@@ -41,7 +41,7 @@ pub struct BoxSize {
 
 impl BoxSize {
     pub const BIG: BoxSize = BoxSize {
-        cpus: 16,
+        cpus: SUT_MAX_CPUS,
         mem_mib: 64 * 1024,
     };
 
@@ -211,7 +211,7 @@ pub fn sudo(args: &[&str]) -> Result<()> {
 pub fn set_sut(b: BoxSize) -> Result<()> {
     ensure!(
         (1..=SUT_MAX_CPUS).contains(&b.cpus),
-        "a box has 1-16 CPUs, not {}",
+        "a box has 1-7 CPUs, not {}",
         b.cpus
     );
     if sut_active() {
@@ -526,7 +526,7 @@ mod tests {
 
     #[test]
     fn box_arguments() {
-        assert_eq!(BoxSize::BIG.cpu_list(), "16-31");
+        assert_eq!(BoxSize::BIG.cpu_list(), "5-11");
         assert_eq!(
             BoxSize {
                 cpus: 1,
@@ -543,7 +543,7 @@ mod tests {
             .cpu_list(),
             "16-19"
         );
-        assert_eq!(BoxSize::BIG.label(), "16cpu-64GiB");
+        assert_eq!(BoxSize::BIG.label(), "7cpu-64GiB");
         assert_eq!(
             BoxSize {
                 cpus: 2,

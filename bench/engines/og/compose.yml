@@ -3,7 +3,7 @@
 # the harness sets CPUs and memory on sut.slice.
 services:
   og:
-    image: og-bench/og:e4d8834
+    image: og-bench/og:under-test
     build:
       context: .
       additional_contexts:
@@ -11,6 +11,6 @@ services:
     network_mode: host
     cgroup_parent: sut.slice
     volumes:
-      - /home/ubuntu/og-bench/data/og/packs/netherlands:/pack:ro
+      - /srv/og-bench/pack:/pack:ro
     command: ["serve", "/pack", "--bind", "127.0.0.1:7100"]
     stop_grace_period: 30s
