@@ -337,14 +337,14 @@ mod tests {
     }
 
     #[test]
-    fn cpu_floor_walks_down_and_falls_back_to_sixteen() {
+    fn cpu_floor_walks_down_and_falls_back_to_the_big_box() {
         let s = cpu_floor(|c| Ok(c >= 2)).unwrap();
         assert_eq!(s.found, Some(2));
         assert_eq!(s.probes, vec![(4, true), (2, true), (1, false)]);
         assert_eq!(cpu_floor(|_| Ok(true)).unwrap().found, Some(1));
-        let s = cpu_floor(|c| Ok(c >= 8)).unwrap();
-        assert_eq!(s.found, Some(16));
-        assert_eq!(s.probes, vec![(4, false), (16, true)]);
+        let s = cpu_floor(|c| Ok(c >= 6)).unwrap();
+        assert_eq!(s.found, Some(7));
+        assert_eq!(s.probes, vec![(4, false), (7, true)]);
         assert_eq!(cpu_floor(|_| Ok(false)).unwrap().found, None);
     }
 

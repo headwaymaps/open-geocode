@@ -533,7 +533,7 @@ mod tests {
                 mem_mib: 256
             }
             .cpu_list(),
-            "16"
+            "5"
         );
         assert_eq!(
             BoxSize {
@@ -541,7 +541,7 @@ mod tests {
                 mem_mib: 256
             }
             .cpu_list(),
-            "16-19"
+            "5-8"
         );
         assert_eq!(BoxSize::BIG.label(), "7cpu-64GiB");
         assert_eq!(
@@ -560,7 +560,7 @@ mod tests {
             let mut s = String::from("cpu  1 2 3 4 5 6 7 8 0 0\n");
             for n in 0..32 {
                 let steal = match n {
-                    16 => steal16,
+                    5 => steal16,
                     0 => steal0,
                     _ => 0,
                 };
@@ -584,15 +584,15 @@ mod tests {
             mem_mib: 1024,
         };
         let n = noise(&a, &b, one);
-        // cpu16: steal +10, total +100 (user, idle) +10 (steal).
+        // cpu5: steal +10, total +100 (user, idle) +10 (steal).
         assert!((n.steal_frac - 10.0 / 110.0).abs() < 1e-12);
         assert_eq!(
             (n.psi_cpu_some_us, n.psi_cpu_full_us, n.psi_memory_some_us),
             (10, 5, 7)
         );
-        // Spread over 16 cores, the same steal is under 1%.
+        // Spread over the big box's 7 cores, the same steal is under 2%.
         let n = noise(&a, &b, BoxSize::BIG);
-        assert!(n.steal_frac < 0.01);
+        assert!(n.steal_frac < 0.02);
     }
 
     #[test]

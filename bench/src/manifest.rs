@@ -24,6 +24,23 @@ pub fn sha256(path: &Path) -> Result<String> {
         .to_string())
 }
 
+/// The extract the query set was drawn from: at the path meta.json records,
+/// or under ~/og-bench/data/pbf when this machine is not the one that drew it.
+fn local_pbf(recorded: &Path) -> Result<std::path::PathBuf> {
+    if recorded.is_file() {
+        return Ok(recorded.to_path_buf());
+    }
+    let name = recorded.file_name().context("meta.json's pbf has no file name")?;
+    let local = crate::home().join("og-bench/data/pbf").join(name);
+    ensure!(
+        local.is_file(),
+        "the query set's extract is at neither {} nor {}",
+        recorded.display(),
+        local.display()
+    );
+    Ok(local)
+}
+
 /// The first line of a command's stdout, or the error in its place.
 fn first_line(cmd: &str, args: &[&str]) -> String {
     match Command::new(cmd).args(args).output() {
@@ -40,7 +57,10 @@ fn first_line(cmd: &str, args: &[&str]) -> String {
 pub fn write(ctx: &Ctx, engines: &[Engine]) -> Result<()> {
     let qdir = ctx.bench_dir.join("data/queries");
     let meta: Value = serde_json::from_str(&std::fs::read_to_string(qdir.join("meta.json"))?)?;
-    let pbf = meta["pbf"].as_str().context("meta.json has no pbf")?;
+    let pbf = local_pbf(Path::new(
+        meta["pbf"].as_str().context("meta.json has no pbf")?,
+    ))?;
+    let pbf = pbf.to_str().context("the pbf path is not UTF-8")?;
     log("manifest: hashing the pbf and query files");
     let repo = ctx.bench_dir.parent().context("bench dir has no parent")?;
     let git = |args: &[&str]| {
